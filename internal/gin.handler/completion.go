@@ -49,10 +49,15 @@ func completions(ctx *gin.Context) {
 		response.Error(ctx, -1, err)
 		return
 	}
-	matchers := common.XmlFlags(ctx, &completion)
+	// matchers := common.XmlFlags(ctx, &completion)
 	ctx.Set(vars.GinCompletion, completion)
 
-	ctx.Set(vars.GinMatchers, matchers)
+	ctx.Set(vars.GinTool, pkg.Keyv[interface{}]{
+		"tasks":   pkg.Config.GetBool("toolcall.tasks"),
+		"enabled": pkg.Config.GetBool("toolcall.enable"),
+	})
+
+	// ctx.Set(vars.GinMatchers, matchers)
 	if common.GinDebugger(ctx) {
 		bodyLogger(completion)
 	}

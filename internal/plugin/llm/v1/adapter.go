@@ -7,6 +7,8 @@ import (
 	"github.com/bincooo/chatgpt-adapter/logger"
 	"github.com/gin-gonic/gin"
 	"strings"
+	"github.com/bincooo/chatgpt-adapter/pkg"
+
 )
 
 var (
@@ -48,7 +50,11 @@ func (API) Completion(ctx *gin.Context) {
 		}
 	}
 
-	retry := 3
+	retry := pkg.Config.GetInt("retry")
+	if retry < 1 {
+		retry = 0
+	}
+	
 label:
 	r, err := fetch(ctx, proxies, cookie, completion)
 	if err != nil {

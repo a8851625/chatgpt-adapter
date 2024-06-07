@@ -7,11 +7,8 @@ import (
 )
 
 func GinDebugger(ctx *gin.Context) bool {
-	if value, ok := GetGinValue[bool](ctx, vars.GinDebugger); ok {
-		return value
-	}
-
-	return false
+	debug := pkg.Config.GetBool("debug")
+	return debug
 }
 
 func GetGinCompletion(ctx *gin.Context) (value pkg.ChatCompletion) {

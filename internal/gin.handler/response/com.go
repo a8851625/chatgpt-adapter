@@ -104,6 +104,7 @@ func Error(ctx *gin.Context, code int, err interface{}) {
 func Response(ctx *gin.Context, model, content string) {
 	created := time.Now().Unix()
 	usage := common.GetGinCompletionUsage(ctx)
+	model = CheckModelName(model)
 	ctx.JSON(http.StatusOK, pkg.ChatResponse{
 		Model:   model,
 		Created: created,
@@ -124,18 +125,27 @@ func Response(ctx *gin.Context, model, content string) {
 	})
 }
 
+func CheckModelName(model string) string { 
+	if strings.Contains(model, "custom") {
+		model = strings.Replace(model, "custom/", "", -1)
+		logger.Debug("model name contains custom , replace custom to %s", model)
+	}
+	 return model
+}
+
 func SSEResponse(ctx *gin.Context, model, content string, created int64) {
 	setSSEHeader(ctx)
 
 	done := false
 	finishReason := ""
 	usage := common.GetGinCompletionUsage(ctx)
-
 	if content == "[DONE]" {
 		done = true
 		content = ""
 		finishReason = "stop"
 	}
+	// if model name contains custom , replace custom to ""
+	model = CheckModelName(model)
 
 	response := pkg.ChatResponse{
 		Model:   model,
@@ -170,6 +180,7 @@ func SSEResponse(ctx *gin.Context, model, content string, created int64) {
 func ToolCallResponse(ctx *gin.Context, model, name, args string) {
 	created := time.Now().Unix()
 	usage := common.GetGinCompletionUsage(ctx)
+	model = CheckModelName(model)
 
 	ctx.JSON(http.StatusOK, pkg.ChatResponse{
 		Model:   model,
@@ -206,6 +217,7 @@ func ToolCallResponse(ctx *gin.Context, model, name, args string) {
 func SSEToolCallResponse(ctx *gin.Context, model, name, args string, created int64) {
 	setSSEHeader(ctx)
 	usage := common.GetGinCompletionUsage(ctx)
+	model = CheckModelName(model)
 
 	response := pkg.ChatResponse{
 		Model:   model,

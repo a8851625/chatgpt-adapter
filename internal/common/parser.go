@@ -1,7 +1,6 @@
 package common
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/bincooo/chatgpt-adapter/internal/vars"
 	"github.com/bincooo/chatgpt-adapter/logger"
@@ -378,119 +377,119 @@ func (xml XmlParser) Parse(value string) []XmlNode {
 
 func XmlFlags(ctx *gin.Context, req *pkg.ChatCompletion) []Matcher {
 	matchers := NewMatchers()
-	flags := pkg.Config.GetBool("flags")
-	if !flags {
-		return matchers
-	}
+	// flags := pkg.Config.GetBool("flags")
+	// if !flags {
+	// 	return matchers
+	// }
 
-	if len(req.Messages) == 0 {
-		return matchers
-	}
+	// if len(req.Messages) == 0 {
+	// 	return matchers
+	// }
 
-	handles := xmlFlagsToContents(ctx, req.Messages)
+	// handles := xmlFlagsToContents(ctx, req.Messages)
 
-	abs := func(n int) int {
-		if n < 0 {
-			return -n
-		}
-		return n
-	}
+	// abs := func(n int) int {
+	// 	if n < 0 {
+	// 		return -n
+	// 	}
+	// 	return n
+	// }
 
-	for _, h := range handles {
-		// 正则替换
-		if h['t'] == "regex" {
-			s := split(h['v'])
-			if len(s) < 2 {
-				continue
-			}
+	// for _, h := range handles {
+	// 	// 正则替换
+	// 	if h['t'] == "regex" {
+	// 		s := split(h['v'])
+	// 		if len(s) < 2 {
+	// 			continue
+	// 		}
 
-			cmp := strings.TrimSpace(s[0])
-			value := strings.TrimSpace(s[1])
-			if cmp == "" {
-				continue
-			}
+	// 		cmp := strings.TrimSpace(s[0])
+	// 		value := strings.TrimSpace(s[1])
+	// 		if cmp == "" {
+	// 			continue
+	// 		}
 
-			// 忽略尾部n条
-			pos, _ := strconv.Atoi(h['m'])
-			if pos > -1 {
-				pos = len(req.Messages) - 1 - pos
-				if pos < 0 {
-					pos = 0
-				}
-			} else {
-				pos = len(req.Messages)
-			}
+	// 		// 忽略尾部n条
+	// 		pos, _ := strconv.Atoi(h['m'])
+	// 		if pos > -1 {
+	// 			pos = len(req.Messages) - 1 - pos
+	// 			if pos < 0 {
+	// 				pos = 0
+	// 			}
+	// 		} else {
+	// 			pos = len(req.Messages)
+	// 		}
 
-			c := regexp.MustCompile(cmp, regexp.Compiled)
-			for idx, message := range req.Messages {
-				if idx < pos && message["role"] != "system" {
-					replace, err := c.Replace(message.GetString("content"), value, -1, -1)
-					if err != nil {
-						logger.Warn("compile failed: "+cmp, err)
-						continue
-					}
-					message["content"] = replace
-				}
-			}
-		}
+	// 		c := regexp.MustCompile(cmp, regexp.Compiled)
+	// 		for idx, message := range req.Messages {
+	// 			if idx < pos && message["role"] != "system" {
+	// 				replace, err := c.Replace(message.GetString("content"), value, -1, -1)
+	// 				if err != nil {
+	// 					logger.Warn("compile failed: "+cmp, err)
+	// 					continue
+	// 				}
+	// 				message["content"] = replace
+	// 			}
+	// 		}
+	// 	}
 
-		// 深度插入
-		if h['t'] == "insert" {
-			i, _ := strconv.Atoi(h['i'])
-			messageL := len(req.Messages)
-			if h['m'] == "true" && messageL-1 < abs(i) {
-				continue
-			}
+	// 	// 深度插入
+	// 	if h['t'] == "insert" {
+	// 		i, _ := strconv.Atoi(h['i'])
+	// 		messageL := len(req.Messages)
+	// 		if h['m'] == "true" && messageL-1 < abs(i) {
+	// 			continue
+	// 		}
 
-			pos := 0
-			if i > -1 {
-				// 正插
-				pos = i
-				if pos >= messageL {
-					pos = messageL - 1
-				}
-			} else {
-				// 反插
-				pos = messageL + i
-				if pos < 0 {
-					pos = 0
-				}
-			}
+	// 		pos := 0
+	// 		if i > -1 {
+	// 			// 正插
+	// 			pos = i
+	// 			if pos >= messageL {
+	// 				pos = messageL - 1
+	// 			}
+	// 		} else {
+	// 			// 反插
+	// 			pos = messageL + i
+	// 			if pos < 0 {
+	// 				pos = 0
+	// 			}
+	// 		}
 
-			req.Messages = append(req.Messages[:pos+1], append([]pkg.Keyv[interface{}]{
-				{"role": h['r'], "content": h['v']},
-			}, req.Messages[pos+1:]...)...)
-		}
+	// 		req.Messages = append(req.Messages[:pos+1], append([]pkg.Keyv[interface{}]{
+	// 			{"role": h['r'], "content": h['v']},
+	// 		}, req.Messages[pos+1:]...)...)
+	// 	}
 
-		// matcher 流响应干预
-		if h['t'] == "matcher" {
-			handleMatcher(h, matchers)
-		}
+	// 	// matcher 流响应干预
+	// 	if h['t'] == "matcher" {
+	// 		handleMatcher(h, matchers)
+	// 	}
 
-		// 历史记录
-		if h['t'] == "histories" {
-			content := strings.TrimSpace(h['v'])
-			if len(content) < 2 || content[0] != '[' || content[len(content)-1] != ']' {
-				continue
-			}
-			var baseMessages []pkg.Keyv[interface{}]
-			if err := json.Unmarshal([]byte(content), &baseMessages); err != nil {
-				logger.Error("histories flags handle failed: ", err)
-				continue
-			}
+	// 	// 历史记录
+	// 	if h['t'] == "histories" {
+	// 		content := strings.TrimSpace(h['v'])
+	// 		if len(content) < 2 || content[0] != '[' || content[len(content)-1] != ']' {
+	// 			continue
+	// 		}
+	// 		var baseMessages []pkg.Keyv[interface{}]
+	// 		if err := json.Unmarshal([]byte(content), &baseMessages); err != nil {
+	// 			logger.Error("histories flags handle failed: ", err)
+	// 			continue
+	// 		}
 
-			if len(baseMessages) == 0 {
-				continue
-			}
+	// 		if len(baseMessages) == 0 {
+	// 			continue
+	// 		}
 
-			for idx := 0; idx < len(req.Messages); idx++ {
-				if !strings.Contains("|system|function|", req.Messages[idx].GetString("role")) {
-					req.Messages = append(req.Messages[:idx], append(baseMessages, req.Messages[idx:]...)...)
-					break
-				}
-			}
-		}
-	}
+	// 		for idx := 0; idx < len(req.Messages); idx++ {
+	// 			if !strings.Contains("|system|function|", req.Messages[idx].GetString("role")) {
+	// 				req.Messages = append(req.Messages[:idx], append(baseMessages, req.Messages[idx:]...)...)
+	// 				break
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	return matchers
 }
