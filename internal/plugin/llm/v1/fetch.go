@@ -6,17 +6,21 @@ import (
 	"github.com/bincooo/emit.io"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"fmt"
 )
 
 func fetch(ctx *gin.Context, proxies, token string, completion pkg.ChatCompletion) (*http.Response, error) {
-	var (
-		baseUrl  = pkg.Config.GetString("custom-llm.baseUrl")
-		useProxy = pkg.Config.GetBool("custom-llm.useProxy")
-	)
+	
+	toolCall := pkg.Config.GetStringMap("toolCall")
+	fmt.Print("%+v\n", toolCall)
 
-	if !useProxy {
-		proxies = ""
+	baseUrl, ok := toolCall["baseurl"].(string)
+	if !ok {
+		panic("toolCall baseUrl is not set")
 	}
+
+	// 从header 获取 authori zation token
+	// 再根据token 路由到不同的 base url
 
 	if completion.TopP == 0 {
 		completion.TopP = 1

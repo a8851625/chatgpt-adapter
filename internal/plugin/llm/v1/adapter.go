@@ -4,9 +4,10 @@ import (
 	"github.com/bincooo/chatgpt-adapter/internal/common"
 	"github.com/bincooo/chatgpt-adapter/internal/gin.handler/response"
 	"github.com/bincooo/chatgpt-adapter/internal/plugin"
+	"github.com/bincooo/chatgpt-adapter/pkg"
 	"github.com/bincooo/chatgpt-adapter/logger"
 	"github.com/gin-gonic/gin"
-	"strings"
+	// "strings"
 )
 
 var (
@@ -19,7 +20,7 @@ type API struct {
 }
 
 func (API) Match(_ *gin.Context, model string) bool {
-	return strings.HasPrefix(model, "custom/")
+	return true;
 }
 
 func (API) Models() []plugin.Model {
@@ -28,7 +29,7 @@ func (API) Models() []plugin.Model {
 			Id:      "custom",
 			Object:  "model",
 			Created: 1686935002,
-			By:      "lmsys-adapter",
+			By:      "toolcall-adapter",
 		},
 	}
 }
@@ -41,14 +42,18 @@ func (API) Completion(ctx *gin.Context) {
 		matchers   = common.GetGinMatchers(ctx)
 	)
 
-	completion.Model = completion.Model[7:]
+	// completion.Model = completion.Model[7:]
 	if plugin.NeedToToolCall(ctx) {
 		if completeToolCalls(ctx, proxies, completion) {
 			return
 		}
 	}
 
-	retry := 3
+	retry := pkg.Config.GetInt("retry")
+	if retry < 0 {
+		retry = 1
+	}
+
 label:
 	r, err := fetch(ctx, proxies, cookie, completion)
 	if err != nil {

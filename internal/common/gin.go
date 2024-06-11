@@ -42,8 +42,8 @@ func GetGinToolValue(ctx *gin.Context) pkg.Keyv[interface{}] {
 	if !ok {
 		tool = pkg.Keyv[interface{}]{
 			"id":      "-1",
-			"enabled": false,
-			"tasks":   false,
+			"enabled": true,
+			"tasks":   pkg.Config.GetBool("toolCall.tasks"),
 		}
 	}
 	return tool

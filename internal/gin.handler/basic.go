@@ -11,6 +11,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"runtime/debug"
 )
 
 func Bind(port int, version, proxies string) {
@@ -27,14 +28,14 @@ func Bind(port int, version, proxies string) {
 
 	route.GET("/", welcome(version))
 	route.POST("/v1/chat/completions", completions)
-	route.POST("/v1/object/completions", completions)
-	route.POST("/proxies/v1/chat/completions", completions)
-	route.POST("v1/images/generations", generations)
-	route.POST("v1/object/generations", generations)
-	route.POST("proxies/v1/images/generations", generations)
-	route.GET("/proxies/v1/models", models)
-	route.GET("/v1/models", models)
-	route.Static("/file/tmp/", "tmp")
+	// route.POST("/v1/object/completions", completions)
+	// route.POST("/proxies/v1/chat/completions", completions)
+	// route.POST("v1/images/generations", generations)
+	// route.POST("v1/object/generations", generations)
+	// route.POST("proxies/v1/images/generations", generations)
+	// route.GET("/proxies/v1/models", models)
+	// route.GET("/v1/models", models)
+	// route.Static("/file/tmp/", "tmp")
 
 	addr := ":" + strconv.Itoa(port)
 	logger.Info(fmt.Sprintf("server start by http://0.0.0.0%s/v1", addr))
@@ -99,6 +100,7 @@ func panicHandler(ctx *gin.Context) {
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Errorf("response error: %v", r)
+			logger.Errorf("stack: %s\n", string(debug.Stack()))
 			response.Error(ctx, -1, fmt.Sprintf("%v", r))
 		}
 	}()
