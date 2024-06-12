@@ -2,7 +2,7 @@
 debug : true
 # toolCall 默认配置化; 在 flags 关闭时也可用
 toolCall:
-  baseUrl: https://openai.heheda.vip
+  baseUrl: http://127.0.0.1:8080
   # enabled: true
   tasks: true
   useProxy: false
